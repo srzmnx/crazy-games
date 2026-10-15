@@ -10,7 +10,7 @@
 		<title>Tsukihime</title>
 
 		<script>
-			if (window.location.pathname === '/') {
+			if (window.location.pathname === '/' || window.location.pathname === '/crazy-games/games/tsukiweb/') {
 				if (!sessionStorage.getItem('app_entry_path')) {
 					sessionStorage.setItem('app_entry_path', '/');
 					document.documentElement.dataset.preloading = 'disclaimer';
