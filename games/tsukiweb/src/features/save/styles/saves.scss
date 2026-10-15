@@ -1,0 +1,321 @@
+@use '@tsukiweb/common/styles/partials/_components.scss';
+@use '@tsukiweb/common/ui-core/styles/_mixins.scss' as *;
+
+#saves-layout {
+	@include mobile-landscape {
+		.page-section {
+			border: 0;
+		}
+	}
+
+	.saves {
+		letter-spacing: 1px;
+		padding-top: 10px;
+		padding-bottom: 80px;
+		transform: translate3d(0, 0, 0); //huge list on GPU
+
+		.virtual-list {
+			position: relative;
+			width: 100%;
+		}
+		.create, .import {
+			margin-bottom: 6px;
+			width: 100%;
+			padding-block: 14px;
+		}
+		.save-container {
+			position: absolute;
+			width: 100%;
+			display: flex;
+			flex-direction: row;
+			height: 120px;
+			border-bottom: 1px solid var(--separator);
+			isolation: isolate;
+
+			&:last-of-type {
+				border-color: transparent;
+			}
+
+			.details {
+				padding: .8em 1em;
+				flex: 1;
+				overflow: hidden;
+				line-height: 1.4;
+
+				.date {
+					color: var(--text-muted);
+					white-space: nowrap;
+					letter-spacing: .5px;
+				}
+				.line {
+					white-space: nowrap;
+					overflow: hidden;
+					text-overflow: ellipsis;
+					max-width: 70ch;
+					margin-top: 2px;
+				}
+			}
+
+			.graphics-area {
+				position: relative;
+				margin-block: 4px;
+				.graphics {
+					font-size: 0.3em;
+				}
+				.choices-preview {
+					position: absolute;
+					inset: 0;
+					display: grid;
+					gap: 2px;
+					align-self: center;
+					justify-self: center;
+					padding-block: 6px;
+					overflow: hidden;
+					max-height: 100%;
+					font-size: 0.5em;
+					letter-spacing: 0.5px;
+					width: 90%;
+					font-weight: 500;
+					color: #ffffffe8;
+
+					.choice {
+						background-color: rgb(1 14 36 / 70%);
+						border: 1px solid var(--surface-light);
+						white-space: nowrap;
+						overflow: hidden;
+						padding: 4px 6px;
+					}
+				}
+			}
+
+			&::after {
+				content: "";
+				position: absolute;
+				inset: 0 -4px;
+				pointer-events: none;
+				box-shadow: var(--selected-shadow);
+				opacity: 0;
+
+				transition: opacity 280ms cubic-bezier(.22, .61, .36, 1);
+			}
+
+			&.active::after {
+				opacity: 1;
+				z-index: 1;
+			}
+
+			&[quick-save]::before {
+				content: "Quick Save";
+				position: absolute;
+				bottom: 0;
+				right: -4px;
+				font-size: .8em;
+				font-style: italic;
+				padding: 0.2em 0.6em 0.2em 4em;
+				background-image: linear-gradient(115deg, transparent 20%, var(--surface-light));
+				z-index: 1;
+			}
+
+			.game-pd {
+				position: absolute;
+				right: -4px;
+				top: 0;
+				border-right: 2px solid var(--surface-light);
+				border-top: 2px solid var(--surface-light);
+				color: var(--attention);
+				border-top-right-radius: 2px;
+				padding-inline: 5px;
+				padding-block: 3px;
+				display: flex;
+				align-items: end;
+				font-size: 0.8em;
+				text-transform: uppercase;
+				font-weight: 600;
+				letter-spacing: 0;
+				line-height: 1;
+			}
+		}
+	}
+
+	.info {
+		overflow-y: auto;
+		scrollbar-gutter: stable;
+		display: flex;
+		flex-direction: column;
+		font-size: 1.1em;
+		border-block: 2px solid var(--separator);
+		border-left: 2px solid var(--separator);
+		position: relative;
+		isolation: isolate;
+
+		.graphics-wrapper {
+			position: relative;
+			.graphics {
+				font-size: 0.6em;
+				overflow: hidden;
+
+				.text {
+					display: none;
+				}
+			}
+
+			.deta {
+				display: flex;
+				flex-direction: column;
+				justify-content: flex-end;
+				position: absolute;
+				bottom: 0;
+				left: 0;
+				right: 0;
+				z-index: 1;
+				padding: .6rem 1rem;
+				font-weight: 500;
+				-webkit-text-stroke: 4px var(--surface-dark);
+				paint-order: stroke fill;
+				text-shadow: 0 0 5px var(--surface-dark);
+			}
+		}
+		.save-details-content {
+			display: flex;
+			flex-direction: column;
+			flex: 1;
+		}
+
+		.progress-panel {
+			margin-top: .5em;
+			display: grid;
+
+			.row {
+				height: 52px;
+				display: flex;
+				padding-inline: .5em;
+				padding-top: .4em;
+				border-bottom: 1px solid var(--separator);
+			}
+			.hearts-list {
+				padding-block: .4em .2em;
+			}
+			.flags-list {
+				grid-column: 1 / -1;
+				margin-top: .5em;
+				padding: 0 .5em;
+			}
+		}
+
+		.actions {
+			margin-top: auto;
+			padding: 1em;
+			align-self: flex-end;
+			display: flex;
+			gap: 4px;
+
+			button {
+				padding: 4px 16px;
+				color: var(--text-muted);
+				font-size: 1.3em;
+
+				&:hover, &:focus-visible, .keyboard-navigating &:focus {
+					color: var(--text-color);
+				}
+			}
+		}
+
+		// phone landscape or phone portrait
+		@media screen and (max-width: 760px) and (orientation: portrait),
+					 screen and (max-height: 680px) and (orientation: landscape) {
+			border-left: none;
+
+			.save-details-content {
+				overflow-y: auto;
+			}
+			.graphics-wrapper {
+				position: absolute;
+				inset: 0;
+				overflow: hidden;
+			}
+			.save-details-content {
+				z-index: 1;
+				border-image: linear-gradient(hsl(202deg 100% 45.03% / 80%), hsla(222, 100%, 14%, 0.7)) fill 1;
+			}
+		}
+
+		@include mobile-landscape {
+			.actions {
+				padding-right: .5em;
+				padding-bottom: .5em;
+			}
+		}
+
+		@mixin mobile-portrait {
+			border-bottom: 0;
+
+			.actions {
+				padding: .5em
+			}
+		}
+	}
+
+	.graphics {
+		aspect-ratio: 4/3;
+		overflow: hidden;
+
+		div.bg img.blur {
+			filter: blur(20px);
+		}
+		div.bg img {
+			object-position: top;
+			overflow-clip-margin: border-box;
+		}
+	}
+
+	.warning-button {
+		opacity: .9;
+		display: inline-flex;
+		padding: 0.4em;
+		margin-left: auto;
+		margin-right: 1em;
+		transform-origin: center;
+		&:not(.active) {
+			animation: periodic-shake 10s infinite;
+		}
+		.warning-icon {
+			font-size: 1.3em;
+			fill: url(#gradient-vertical) yellow;
+		}
+		#gradient-vertical {
+			--color-stop-1: #00c3ff;
+			--color-stop-2: #77e190;
+			--color-stop-3: #ffff1c;
+		}
+		&:hover, &:focus-visible, .keyboard-navigating &:focus {
+			opacity: 1;
+		}
+
+		@keyframes periodic-shake {
+			0%, 39%, 59%, 100% {
+				transform: rotate(0deg) scale(1);
+			}
+			40% {
+				transform: rotate(-4deg) scale(1.5);
+			}
+			42% {
+				transform: rotate(4deg) scale(1.5);
+			}
+			44% {
+				transform: rotate(-4deg) scale(1.5);
+			}
+			46% {
+				transform: rotate(4deg) scale(1.5);
+			}
+			48% {
+				transform: rotate(0deg) scale(1);
+			}
+		}
+	}
+
+	@media screen and (max-width: 760px) and (orientation: portrait) {
+		.warning-button {
+			margin-right: 0;
+		}
+	}
+}
