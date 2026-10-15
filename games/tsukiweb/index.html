@@ -10,14 +10,20 @@
 		<title>Tsukihime</title>
 
 		<script>
-			if (window.location.pathname === '/' || window.location.pathname === '/crazy-games/games/tsukiweb/') {
-				if (!sessionStorage.getItem('app_entry_path')) {
-					sessionStorage.setItem('app_entry_path', '/');
-					document.documentElement.dataset.preloading = 'disclaimer';
-				}
-			} else if (!sessionStorage.getItem('app_entry_path')) {
-				sessionStorage.setItem('app_entry_path', window.location.pathname);
-			}
+			const currentPath = window.location.pathname;
+const isHomePath = currentPath === '/' || currentPath === '/crazy-games/games/tsukiweb' || currentPath === '/crazy-games/games/tsukiweb/';
+
+if (isHomePath) {
+    if (!sessionStorage.getItem('app_entry_path')) {
+        sessionStorage.setItem('app_entry_path', '/');
+        document.documentElement.dataset.preloading = 'disclaimer';
+    }
+} else if (!sessionStorage.getItem('app_entry_path')) {
+    // Strip out the subfolders so the inner engine gets a clean route it understands
+    const cleanPath = currentPath.replace('/crazy-games/games/tsukiweb', '') || '/';
+    sessionStorage.setItem('app_entry_path', cleanPath);
+}
+
 		</script>
 		<style>:root{--ui-font:"Ubuntu";--game-font:"Ubuntu"}*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html{font-family:var(--ui-font,system-ui), Arial, sans-serif;--lightningcss-light:initial;--lightningcss-dark: ;color-scheme:light dark;color:#e0e3ec;font-synthesis:none;text-rendering:optimizelegibility;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;-webkit-text-size-adjust:100%;background-color:#000;font-size:1.1rem;font-weight:400;line-height:1.5}@media (prefers-color-scheme:dark){html{--lightningcss-light: ;--lightningcss-dark:initial}}body{touch-action:manipulation;margin:0;display:flex}#root{isolation:isolate;background-image:radial-gradient(oklch(32% .16 262) 10%,oklch(12% .08 268));justify-content:center;align-items:center;width:100vw;height:100svh;display:flex;position:relative;overflow:hidden}html[data-preloading=disclaimer] #root{background:#000!important}</style>
 		<script type="module" crossorigin src="/crazy-games/games/tsukiweb/assets/index-Bt4QVp4K.js"></script>
