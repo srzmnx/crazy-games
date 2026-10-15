@@ -741,7 +741,7 @@ video {
 }
 
 body, html{
-  background-image: linear-gradient(rgb(33, 97, 50), rgb(13, 43, 21), rgb(19, 36, 20));
+  background-image: linear-gradient(rgb(43, 43, 43), rgb(22, 22, 22), rgb(0, 0, 0));
   background-size: cover;
   opacity:1;
 }
