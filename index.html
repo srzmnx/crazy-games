@@ -110,6 +110,42 @@
       border: 0;
       background: #000;
     }
+
+    /* Version picker (multi-version games) */
+    .version-picker {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      padding: 24px;
+      overflow: auto;
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .version-picker.show {
+      display: flex;
+    }
+    .version-picker .version-prompt {
+      font-size: 1.75rem;
+      font-weight: 600;
+      text-align: center;
+    }
+    .version-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 16px;
+      padding: 8px;
+    }
+    .version-btn {
+      min-width: 200px;
+      padding: 18px 24px;
+      color: #fff;
+      background: #1f1f1f;
+      font-family: 'Noto Sans', sans-serif;
+    }
   </style>
 </head>
 
@@ -205,25 +241,34 @@
         <div class="card shadow-lg rounded-xl text-center hover:shadow-xl hover:outline-4 outline-white outline-0 hover:outline-4 outline outline-offset-0 hover:outline-offset-4 transition-all duration-300">
           <img class="rounded-t-xl" width="400px" src="images/ngon.webp" />
           <h1 class="text-3xl pt-2.5 text-white">n-gon</h1>
+          <h2 class="text-xl pb-2.5 text-white">Mr. Landgreen...</h2>
         </div>
       </a>
-       <a href="games/yumenikki/index.html">
+      <a href="games/yumenikki/index.html">
         <div class="card shadow-lg rounded-xl text-center hover:shadow-xl hover:outline-4 outline-white outline-0 hover:outline-4 outline outline-offset-0 hover:outline-offset-4 transition-all duration-300">
           <img class="rounded-t-xl" width="400px" src="images/yumenikki.webp" />
           <h1 class="text-3xl pt-2.5 text-white">ゆめにっき</h1>
         </div>
       </a>
-       <a href="games/dante/index.html">
+      <a href="games/dante/index.html">
         <div class="card shadow-lg rounded-xl text-center hover:shadow-xl hover:outline-4 outline-white outline-0 hover:outline-4 outline outline-offset-0 hover:outline-offset-4 transition-all duration-300">
           <img class="rounded-t-xl" width="400px" src="images/dante.webp" />
           <h1 class="text-3xl pt-2.5 text-white">Dante</h1>
           <h2 class="text-xl pb-2.5 text-white">3D Adventure Through Hell</h2>
         </div>
-        <a href="games/dogeminer/index.html">
+      </a>
+      <a href="games/dogeminer/index.html">
         <div class="card shadow-lg rounded-xl text-center hover:shadow-xl hover:outline-4 outline-white outline-0 hover:outline-4 outline outline-offset-0 hover:outline-offset-4 transition-all duration-300">
           <img class="rounded-t-xl" width="400px" src="images/dogeminer.webp" />
           <h1 class="text-3xl pt-2.5 text-white">Doge Miner</h1>
           <h2 class="text-xl pb-2.5 text-white">Journey to the Moon!</h2>
+        </div>
+      </a>
+      <!-- Multi-version game: data-versions picks the version list in the script below -->
+      <a href="#" data-versions="minecraft">
+        <div class="card shadow-lg rounded-xl text-center hover:shadow-xl hover:outline-4 outline-white outline-0 hover:outline-4 outline outline-offset-0 hover:outline-offset-4 transition-all duration-300">
+          <img class="rounded-t-xl" width="400px" src="images/minecraft.webp" />
+          <h1 class="text-3xl pt-2.5 text-white">Minecraft</h1>
         </div>
       </a>
     </div>
@@ -237,6 +282,10 @@
         <button id="game-fullscreen" type="button" title="Fullscreen">Fullscreen</button>
         <button id="game-close" type="button" class="close" title="Close">Close ✕</button>
       </div>
+      <div id="version-picker" class="version-picker">
+        <h2 class="version-prompt">This game has multiple versions. Select which one you'd like to play.</h2>
+        <div id="version-grid" class="version-grid"></div>
+      </div>
       <iframe id="game-frame" class="game-frame" allow="fullscreen; autoplay; gamepad; keyboard-map; clipboard-write" allowfullscreen></iframe>
     </div>
   </div>
@@ -246,19 +295,65 @@
       var modal = document.getElementById('game-modal');
       var frame = document.getElementById('game-frame');
       var title = document.getElementById('game-title');
+      var picker = document.getElementById('version-picker');
+      var grid = document.getElementById('version-grid');
+      var fsBtn = document.getElementById('game-fullscreen');
 
-      function openGame(url, name) {
-        title.textContent = name || '';
+      // Games with multiple versions: label shown on the button -> page to load
+      var VERSIONS = {
+        minecraft: [
+          { label: 'Beta 1.7.3', url: 'games/eagler/beta1.7.3/index.html' },
+          { label: '1.5.2',      url: 'games/eagler/1.5.2/index.html' },
+          { label: '1.8.8',      url: 'games/eagler/1.8.8/index.html' },
+          { label: '1.12.2',     url: 'games/eagler/1.12.2/index.html' },
+          { label: '26.2',       url: 'games/eagler/26.2/index.html' }
+        ]
+      };
+
+      var CARD_CLASSES = 'version-btn card shadow-lg rounded-xl text-center hover:shadow-xl hover:outline-4 outline-white outline-0 outline outline-offset-0 hover:outline-offset-4 transition-all duration-300';
+
+      function showFrame(url) {
+        picker.classList.remove('show');
+        frame.style.display = '';
+        fsBtn.style.display = '';
         frame.src = url;
+        frame.focus();
+      }
+
+      function showPicker(key) {
+        grid.innerHTML = '';
+        VERSIONS[key].forEach(function (v) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.className = CARD_CLASSES;
+          var h = document.createElement('h1');
+          h.className = 'text-3xl text-white';
+          h.textContent = v.label;
+          b.appendChild(h);
+          b.addEventListener('click', function () { showFrame(v.url); });
+          grid.appendChild(b);
+        });
+        frame.style.display = 'none';
+        fsBtn.style.display = 'none';
+        picker.classList.add('show');
+      }
+
+      function openGame(url, name, versionsKey) {
+        title.textContent = name || '';
         modal.classList.add('open');
         document.body.style.overflow = 'hidden';
-        frame.focus();
+        if (versionsKey && VERSIONS[versionsKey]) {
+          showPicker(versionsKey);
+        } else {
+          showFrame(url);
+        }
       }
 
       function closeGame() {
         if (document.fullscreenElement) document.exitFullscreen();
         modal.classList.remove('open');
         frame.src = 'about:blank'; // stops the game and its audio
+        picker.classList.remove('show');
         document.body.style.overflow = '';
       }
 
@@ -275,16 +370,17 @@
       // Intercept clicks on game cards
       document.querySelectorAll('#cards-container a').forEach(function (a) {
         a.addEventListener('click', function (e) {
-          // let ctrl/cmd/middle-click open in a new tab as normal
-          if (e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0) return;
+          var key = a.getAttribute('data-versions');
+          // let ctrl/cmd/middle-click open in a new tab as normal (not for version pickers)
+          if (!key && (e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0)) return;
           e.preventDefault();
           var h1 = a.querySelector('h1');
-          openGame(a.getAttribute('href'), h1 ? h1.textContent : '');
+          openGame(a.getAttribute('href'), h1 ? h1.textContent : '', key);
         });
       });
 
       document.getElementById('game-close').addEventListener('click', closeGame);
-      document.getElementById('game-fullscreen').addEventListener('click', toggleFullscreen);
+      fsBtn.addEventListener('click', toggleFullscreen);
 
       // Click the dark backdrop to close
       modal.addEventListener('click', function (e) {
